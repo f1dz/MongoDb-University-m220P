@@ -22,8 +22,15 @@ mflix = MongoClient(host)["mflix"]
 # checks that its type is a string
 # a projection is not required, but may help reduce the amount of data sent
 # over the wire!
-predicate = {"some_field": {"$some_operator": "some_expression"}}
-projection = None
+predicate = {
+    'lastupdated': {
+        '$exists': 1
+    }, 
+    'lastupdated': {
+        '$type': 'string'
+    }
+}
+projection = {'_id': 1, 'lastupdated': 1}
 
 cursor = mflix.movies.find(predicate, projection)
 
@@ -47,7 +54,7 @@ try:
     # the new ISODate() type
     bulk_updates = [UpdateOne(
         {"_id": movie.get("doc_id")},
-        {"$some_update_operator": {"some_field_to_update"}}
+        {"$set": {'lastupdated': movie.get('lastupdated')}}
     ) for movie in movies_to_migrate]
 
     # here's where the bulk operation is sent to MongoDB
