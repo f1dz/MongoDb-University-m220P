@@ -262,6 +262,19 @@ def get_movie(id):
                 "$match": {
                     "_id": ObjectId(id)
                 }
+            },{
+                "$lookup": {
+                    "from": 'comments',
+                    "let": {'id': '$_id'},
+                    "pipeline": [
+                        {'$match': 
+                        {'$expr': {'$eq': ['$movie_id', '$$id']}}
+                        }
+                        ],
+                    "as": 'comments'
+                }
+            },{
+                "$sort": { "comments.date": -1 }
             }
         ]
 
@@ -270,7 +283,7 @@ def get_movie(id):
 
     # TODO: Error Handling
     # If an invalid ID is passed to `get_movie`, it should return None.
-    except (StopIteration) as _:
+    except (StopIteration, InvalidId) as _:
 
         """
         Ticket: Error Handling
